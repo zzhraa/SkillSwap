@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,13 +88,27 @@ export function MentorCard({ mentor }: MentorCardProps) {
               {levelLabel(mentor.level)}
             </Badge>
           </div>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Star className="h-4 w-4 fill-[--star] text-[--star]" />
-            <span>{mentor.rating.toFixed(1)}</span>
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={cn(
+                    "h-4 w-4",
+                    star <= Math.round(mentor.rating)
+                      ? "fill-star text-star"
+                      : "text-border"
+                  )}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-medium text-foreground">
+              {mentor.rating.toFixed(1)}
+            </span>
           </div>
         </CardContent>
       </Link>
-      <CardFooter className="p-5 pt-0">
+      <CardFooter className="p-5">
         <Button asChild className="w-full">
           <Link href={`/requests/new?skillId=${mentor.skillId}`}>
             Kirim Request

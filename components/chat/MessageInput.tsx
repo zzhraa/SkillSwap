@@ -55,7 +55,7 @@ export function MessageInput({
   }
 
   return (
-    <div className="flex items-end gap-2 border-t border-border p-3">
+    <div className="flex items-end gap-2 border-t border-border p-4">
       <Button
         type="button"
         variant="ghost"

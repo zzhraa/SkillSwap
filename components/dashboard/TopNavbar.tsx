@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 interface TopNavbarProps {
   onMenuClick?: () => void;
   hasNotifications?: boolean;
+  searchPlaceholder?: string;
 }
 
 const currentUser = {
@@ -27,6 +28,7 @@ function getInitials(name: string) {
 export function TopNavbar({
   onMenuClick,
   hasNotifications = true,
+  searchPlaceholder = "Search mentor or skill...",
 }: TopNavbarProps) {
   const [query, setQuery] = useState("");
 
@@ -48,7 +50,7 @@ export function TopNavbar({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari skill atau mentor..."
+            placeholder={searchPlaceholder}
             className={cn(
               "h-9 w-full rounded-md border border-border bg-background pl-9 pr-8 text-sm",
               "placeholder:text-muted-foreground",

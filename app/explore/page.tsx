@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Star, Compass } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopNavbar } from "@/components/dashboard/TopNavbar";
 import { BottomNavigation } from "@/components/dashboard/BottomNavigation";
@@ -155,15 +156,27 @@ function MentorCard({ mentor }: { mentor: Mentor }) {
             {levelLabel(mentor.level)}
           </Badge>
         </div>
-        <div className="flex items-center gap-1">
-          <Star className="h-3.5 w-3.5 fill-star text-star" />
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={cn(
+                  "h-3.5 w-3.5",
+                  star <= Math.round(mentor.rating)
+                    ? "fill-star text-star"
+                    : "text-border"
+                )}
+              />
+            ))}
+          </div>
           <span className="text-xs font-medium text-foreground">
             {mentor.rating.toFixed(1)}
           </span>
         </div>
       </CardContent>
 
-      <CardFooter className="p-5 pt-0">
+      <CardFooter className="p-5">
         <Button type="button" className="w-full">
           Kirim Request
         </Button>
@@ -195,7 +208,7 @@ export default function ExplorePage() {
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopNavbar onMenuClick={() => setIsDrawerOpen(true)} />
+        <TopNavbar onMenuClick={() => setIsDrawerOpen(true)} searchPlaceholder="Search mentor..." />
         <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
           <div className="mx-auto max-w-6xl space-y-8 p-4 sm:p-6">
             <div className="space-y-1">
@@ -211,7 +224,7 @@ export default function ExplorePage() {
               <SearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder="Cari skill atau nama mentor..."
+                placeholder="Search mentor..."
               />
               <CategoryFilter
                 categories={categories}
