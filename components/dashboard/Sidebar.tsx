@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Compass,
@@ -105,6 +105,12 @@ function NavList({ items, pathname }: { items: NavItem[]; pathname: string }) {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  function handleLogout() {
+    localStorage.removeItem("isLoggedIn");
+    router.push("/login");
+}
 
   return (
     <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">
@@ -118,10 +124,8 @@ export function Sidebar() {
           </span>
         </Link>
       </div>
-
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
         <NavList items={primaryNavItems} pathname={pathname} />
-
         <div>
           <p className="px-3 pb-2 text-2xs font-medium uppercase tracking-wide text-muted-foreground">
             Account
@@ -129,7 +133,6 @@ export function Sidebar() {
           <NavList items={accountNavItems} pathname={pathname} />
         </div>
       </nav>
-
       <div className="flex items-center gap-3 border-t border-border px-4 py-3">
         <Avatar className="h-9 w-9">
           <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
@@ -147,6 +150,7 @@ export function Sidebar() {
         </div>
         <button
           type="button"
+          onClick={handleLogout}
           aria-label="Logout"
           className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
         >

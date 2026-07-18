@@ -49,9 +49,12 @@ export default function LoginPage() {
     } else if (!EMAIL_REGEX.test(email)) {
       nextErrors.email = "Format email tidak valid";
     }
-    if (!password) {
+    if (!password.trim()) {
       nextErrors.password = "Password wajib diisi";
+    } else if (password.length < 6) {
+      nextErrors.password = "Password minimal 6 karakter";
     }
+  
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }

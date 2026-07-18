@@ -107,7 +107,7 @@ export default function RegisterPage() {
       nextErrors.email = "Format email tidak valid";
     }
 
-    if (!password) {
+    if (!password.trim()) {
       nextErrors.password = "Password wajib diisi";
     } else if (password.length < PASSWORD_MIN_LENGTH) {
       nextErrors.password = `Password minimum ${PASSWORD_MIN_LENGTH} karakter`;
