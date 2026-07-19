@@ -61,15 +61,29 @@ export default function LoginPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+
     if (!validate()) return;
 
     setIsSubmitting(true);
+
     try {
-      // Simulate backend delay
       await new Promise((resolve) => setTimeout(resolve, 600));
-      // Save simulated login state
+
+      let role: "admin" | "user" = "user";
+
+      // akun admin dummy
+      if (email === "admin@skillswap.com") {
+        role = "admin";
+      }
+
       localStorage.setItem("isLoggedIn", "true");
-      router.push("/dashboard");
+      localStorage.setItem("userRole", role);
+
+      if (role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } finally {
       setIsSubmitting(false);
     }

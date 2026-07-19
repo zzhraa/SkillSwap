@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Compass,
@@ -117,6 +117,14 @@ function NavList({ items, pathname }: { items: NavItem[]; pathname: string }) {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  function handleLogout() {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userRole");
+
+    router.replace("/login");
+  }
+
   const isAdmin = pathname?.startsWith("/admin") ?? false;
 
   return (
@@ -166,6 +174,7 @@ export function Sidebar() {
         <button
           type="button"
           aria-label="Logout"
+          onClick={handleLogout}
           className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
         >
           <LogOut className="h-4 w-4" />
