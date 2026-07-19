@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -50,11 +51,6 @@ interface CurrentUser {
   email: string;
   avatarUrl?: string;
 }
-
-const currentUser: CurrentUser = {
-  name: "Dimas Pratama",
-  email: "dimas.pratama@student.ac.id",
-};
 
 function getInitials(name: string) {
   return name
@@ -118,14 +114,27 @@ function NavList({ items, pathname }: { items: NavItem[]; pathname: string }) {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+
+  const isAdmin = pathname?.startsWith("/admin") ?? false;
+
+  const [currentUser, setCurrentUser] = useState<CurrentUser>({
+    name: "Dimas Pratama",
+    email: "dimas.pratama@student.ac.id",
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   function handleLogout() {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userRole");
-
-    router.replace("/login");
+    router.push("/login");
   }
-
-  const isAdmin = pathname?.startsWith("/admin") ?? false;
 
   return (
     <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">

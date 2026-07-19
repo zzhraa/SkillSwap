@@ -152,6 +152,15 @@ export default function ProfilePage() {
 
   function handleSaveProfile(values: ProfileFormValues) {
     setProfile(values);
+
+    localStorage.setItem(
+      "currentUser",
+      JSON.stringify({
+        name: values.fullName,
+        email: "dimas.pratama@student.ac.id",
+        avatarUrl: values.avatarUrl,
+      })
+    );
   }
 
   return (
