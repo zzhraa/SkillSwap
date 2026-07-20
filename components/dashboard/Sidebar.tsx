@@ -117,6 +117,28 @@ export function Sidebar() {
 
   const isAdmin = pathname?.startsWith("/admin") ?? false;
 
+  async function handleLogout() {
+    const confirmLogout = window.confirm(
+      "Apakah Anda yakin ingin keluar dari akun?"
+    );
+
+    if (!confirmLogout) return;
+
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        router.replace("/login");
+      } else {
+        alert("Logout gagal. Silakan coba lagi.");
+      }
+    } catch {
+      alert("Terjadi kesalahan saat logout.");
+    }
+  }
+
   const [currentUser, setCurrentUser] = useState<CurrentUser>({
     name: "Loading...",
     email: "",
@@ -140,16 +162,6 @@ export function Sidebar() {
     }
     loadUser();
   }, []);
-
-  async function handleLogout() {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-    } catch {
-      // Abaikan error
-      router.push("/login");
-    }
-  }
 
   return (
     <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">
