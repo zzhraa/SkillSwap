@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Users, Sparkles, FolderKanban, ArrowRight } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -14,6 +14,12 @@ interface AdminStat {
   value: string;
   icon: React.ElementType;
 }
+
+export default function AdminPage() {
+
+  const router = useRouter();
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [stats, setStats] = useState<AdminStat[]>([
     { label: "Total Users", value: "...", icon: Users },
