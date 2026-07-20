@@ -22,7 +22,10 @@ export async function GET(
       .eq("id", id)
       .single();
 
-    const req = room?.requests as { sender_id: string; receiver_id: string } | null;
+    // const req = room?.requests as { sender_id: string; receiver_id: string } | null;
+    const req = Array.isArray(room?.requests)
+      ? room.requests[0]
+      : room?.requests;
     if (!room || !req || (req.sender_id !== user.id && req.receiver_id !== user.id)) {
       return NextResponse.json({ error: "Tidak diizinkan" }, { status: 403 });
     }
@@ -70,7 +73,10 @@ export async function POST(
       .eq("id", id)
       .single();
 
-    const req = room?.requests as { sender_id: string; receiver_id: string } | null;
+    // const req = room?.requests as { sender_id: string; receiver_id: string } | null;
+    const req = Array.isArray(room?.requests)
+      ? room.requests[0]
+      : room?.requests;
     if (!room || !req || (req.sender_id !== user.id && req.receiver_id !== user.id)) {
       return NextResponse.json({ error: "Tidak diizinkan" }, { status: 403 });
     }
