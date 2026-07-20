@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Eye, Pencil, Plus, Search, ShieldAlert, Sparkles, Trash2, X } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopNavbar } from "@/components/dashboard/TopNavbar";
