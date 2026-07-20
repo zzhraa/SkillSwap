@@ -96,7 +96,7 @@ export default function ChatPage() {
             content: m.message,
             senderId: m.sender?.id || m.sender_id, // Adjusting in case join is populated
             createdAt: m.created_at,
-            status: "sent",
+            // status: "sent",
             isRead: true,
           }));
           setMessages(formatted.reverse()); // Supabase default sort desc, kita reverse buat UI (dari atas ke bawah)
@@ -123,7 +123,7 @@ export default function ChatPage() {
               content: newMsg.message,
               senderId: newMsg.sender_id,
               createdAt: newMsg.created_at,
-              status: "sent",
+              // status: "sent",
               isRead: false,
             },
           ]);
