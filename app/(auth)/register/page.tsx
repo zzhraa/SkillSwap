@@ -136,9 +136,27 @@ export default function RegisterPage() {
 
     setIsSubmitting(true);
     try {
-      // integrate with Supabase Auth sign-up
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      router.push("/dashboard");
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: fullName, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({ form: data.error ?? "Registrasi gagal, coba lagi." });
+        return;
+      }
+
+      if (data.needsEmailVerification) {
+        alert("Registrasi berhasil! Silakan periksa email Anda (termasuk folder spam) untuk melakukan verifikasi sebelum login.");
+        router.push("/login");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch {
+      setErrors({ form: "Tidak dapat terhubung ke server." });
     } finally {
       setIsSubmitting(false);
     }

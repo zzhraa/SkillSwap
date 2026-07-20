@@ -2,7 +2,7 @@
 "use client";
 
 import type { ElementType } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   AlertTriangle,
@@ -56,14 +56,16 @@ export default function SettingsPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
 
+  const [userId, setUserId] = useState<string | null>(null);
+
   const [profile, setProfile] = useState<ProfileSettingsValues>({
-    fullName: "Dimas Pratama",
-    bio: "Mahasiswa Teknik Informatika, suka membangun aplikasi web dan berbagi ilmu programming ke teman-teman kampus.",
+    fullName: "Loading...",
+    bio: "",
     avatarUrl: undefined,
   });
 
   const [account, setAccount] = useState<AccountSettingsValues>({
-    email: "dimas.pratama@kampus.ac.id",
+    email: "loading...",
   });
 
   const [notifications, setNotifications] = useState<NotificationSettingsValues>({
@@ -79,30 +81,82 @@ export default function SettingsPage() {
     requestPreference: "everyone",
   });
 
-  function handleSaveProfile(values: ProfileSettingsValues) {
-    setProfile(values);
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const { user } = await res.json();
+          setUserId(user.id);
+          setProfile({
+            fullName: user.name || "",
+            bio: user.bio || "",
+            avatarUrl: user.avatar || undefined,
+          });
+          setAccount({ email: user.email || "" });
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadData();
+  }, []);
+
+  async function handleSaveProfile(values: ProfileSettingsValues) {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.fullName,
+          bio: values.bio,
+          avatar: values.avatarUrl,
+        }),
+      });
+      if (res.ok) setProfile(values);
+    } catch {
+      // ignore
+    }
   }
 
   function handleSaveEmail(email: string) {
-    setAccount((prev) => ({ ...prev, email }));
+    alert("Fitur ganti email sedang dalam tahap pengembangan.");
   }
 
-  function handleChangePassword(values: {
+  async function handleChangePassword(values: {
     currentPassword: string;
     newPassword: string;
   }) {
-    // integrate with Supabase Auth password update
-    console.log("change password", values);
+    try {
+      const res = await fetch("/api/auth/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: values.newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert("Gagal ubah password: " + (data.error || "Error"));
+      } else {
+        alert("Password berhasil diubah! Silakan login kembali dengan password baru Anda.");
+        handleLogout();
+      }
+    } catch {
+      alert("Terjadi kesalahan sistem saat mengubah password.");
+    }
   }
 
-  function handleLogout() {
-    // integrate with Supabase Auth sign out
-    console.log("logout");
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch {
+      // ignore
+    }
   }
 
   function handleDeleteAccount() {
-    // integrate with account deletion flow
-    console.log("delete account");
+    alert("Fitur hapus akun sedang dalam tahap pengembangan.");
   }
 
   return (

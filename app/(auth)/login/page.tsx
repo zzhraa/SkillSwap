@@ -67,23 +67,27 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      let role: "admin" | "user" = "user";
+      const data = await res.json();
 
-      // akun admin dummy
-      if (email === "admin@skillswap.com") {
-        role = "admin";
+      if (!res.ok) {
+        setErrors({ form: data.error ?? "Login gagal, coba lagi." });
+        return;
       }
 
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userRole", role);
-
+      const role = data.user?.role ?? "user";
       if (role === "admin") {
         router.push("/admin");
       } else {
         router.push("/dashboard");
       }
+    } catch {
+      setErrors({ form: "Tidak dapat terhubung ke server." });
     } finally {
       setIsSubmitting(false);
     }

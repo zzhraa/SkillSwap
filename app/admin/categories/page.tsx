@@ -90,9 +90,33 @@ function statusLabel(status: CategoryStatus) {
 
 export default function AdminCategoriesPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+          const { categories: rawCats } = await res.json();
+          setCategories(
+            (rawCats || []).map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              iconEmoji: c.icon || "📁",
+              description: c.description || "",
+              totalSkills: 0, // Fallback mock
+              status: "active",
+            }))
+          );
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadCategories();
+  }, []);
 
   const filteredCategories = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -105,20 +129,10 @@ export default function AdminCategoriesPage() {
   }, [categories, searchQuery]);
 
   function handleAddCategory() {
-    // Frontend-only simulation: no backend/Supabase call.
-    const newCategory: Category = {
-      id: `cat-${Date.now()}`,
-      name: "Kategori Baru",
-      iconEmoji: "✨",
-      description: "Deskripsi kategori baru",
-      totalSkills: 0,
-      status: "active",
-    };
-    setCategories((prev) => [newCategory, ...prev]);
+    alert("Menambah kategori melalui UI ini akan diimplementasi nanti via Admin API.");
   }
 
   function handleEditCategory(category: Category) {
-    // Frontend-only simulation: toggles status as a stand-in for a real edit form.
     setCategories((prev) =>
       prev.map((item) =>
         item.id === category.id

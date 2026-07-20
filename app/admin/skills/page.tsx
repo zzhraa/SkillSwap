@@ -291,10 +291,34 @@ function DeleteSkillModal({ skill, onClose, onConfirm }: DeleteSkillModalProps) 
 
 export default function AdminSkillsPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [skills, setSkills] = useState<AdminSkill[]>(initialSkills);
+  const [skills, setSkills] = useState<AdminSkill[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewingSkill, setViewingSkill] = useState<AdminSkill | null>(null);
   const [deletingSkill, setDeletingSkill] = useState<AdminSkill | null>(null);
+
+  useEffect(() => {
+    async function loadSkills() {
+      try {
+        const res = await fetch("/api/skills");
+        if (res.ok) {
+          const { skills: rawSkills } = await res.json();
+          setSkills(
+            (rawSkills || []).map((s: any) => ({
+              id: s.id,
+              name: s.title,
+              category: "Kategori", // Mock fallback since category name isn't fully joined
+              mentorName: s.users?.name || "Unknown",
+              level: s.level,
+              status: "active",
+            }))
+          );
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadSkills();
+  }, []);
 
   const filteredSkills = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -308,6 +332,7 @@ export default function AdminSkillsPage() {
   }, [skills, searchQuery]);
 
   function handleToggleStatus(skill: AdminSkill) {
+    // Only UI update, backend endpoint doesn't exist yet
     setSkills((prev) =>
       prev.map((item) =>
         item.id === skill.id
@@ -321,21 +346,13 @@ export default function AdminSkillsPage() {
   }
 
   function handleConfirmDelete(skill: AdminSkill) {
+    // Only UI update
     setSkills((prev) => prev.filter((item) => item.id !== skill.id));
     setDeletingSkill(null);
   }
 
   function handleAddSkill() {
-    // Frontend-only simulation: append a placeholder skill to local state.
-    const newSkill: AdminSkill = {
-      id: `skill-${Date.now()}`,
-      name: "Skill Baru",
-      category: "Lainnya",
-      mentorName: "Belum Ditentukan",
-      level: "beginner",
-      status: "active",
-    };
-    setSkills((prev) => [newSkill, ...prev]);
+    alert("Untuk menambah skill, gunakan halaman Explore atau Profile pengguna secara langsung.");
   }
 
   return (

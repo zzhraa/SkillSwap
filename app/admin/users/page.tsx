@@ -306,10 +306,34 @@ function DeleteUserModal({ user, onClose, onConfirm }: DeleteUserModalProps) {
 
 export default function AdminUsersPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [users, setUsers] = useState<AdminUser[]>(initialUsers);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewingUser, setViewingUser] = useState<AdminUser | null>(null);
   const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const res = await fetch("/api/admin/users");
+        if (res.ok) {
+          const { users: rawUsers } = await res.json();
+          setUsers(
+            (rawUsers || []).map((u: any) => ({
+              id: u.id,
+              fullName: u.name || "Unknown",
+              email: u.email,
+              role: u.role || "user",
+              status: "active", // Default since no is_active column
+              joinedDate: u.created_at,
+            }))
+          );
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadUsers();
+  }, []);
 
   const filteredUsers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -322,6 +346,7 @@ export default function AdminUsersPage() {
   }, [users, searchQuery]);
 
   function handleToggleStatus(user: AdminUser) {
+    // API endpoint for this doesn't exist yet, just UI update
     setUsers((prev) =>
       prev.map((item) =>
         item.id === user.id
@@ -335,6 +360,7 @@ export default function AdminUsersPage() {
   }
 
   function handleConfirmDelete(user: AdminUser) {
+    // API endpoint for this doesn't exist yet, just UI update
     setUsers((prev) => prev.filter((item) => item.id !== user.id));
     setDeletingUser(null);
   }

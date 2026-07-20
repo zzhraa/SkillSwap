@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Star, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,86 +30,54 @@ interface Mentor {
   rating: number;
 }
 
-const categories: Category[] = [
-  { id: "cat-teknologi", name: "Teknologi", iconEmoji: "💻" },
-  { id: "cat-desain", name: "Desain", iconEmoji: "🎨" },
-  { id: "cat-bahasa", name: "Bahasa", iconEmoji: "🌍" },
-  { id: "cat-bisnis", name: "Bisnis", iconEmoji: "📊" },
-  { id: "cat-seni", name: "Seni & Musik", iconEmoji: "🎵" },
-  { id: "cat-akademik", name: "Akademik", iconEmoji: "📚" },
-  { id: "cat-sport", name: "Kesehatan & Sport", iconEmoji: "⚽" },
-];
-
-const mentors: Mentor[] = [
-  {
-    id: "mentor-1",
-    name: "Dimas Pratama",
-    department: "Teknik Informatika",
-    skillName: "React.js",
-    skillId: "skill-1",
-    categoryId: "cat-teknologi",
-    level: "advanced",
-    rating: 4.8,
-  },
-  {
-    id: "mentor-2",
-    name: "Rina Kusuma",
-    department: "Desain Komunikasi Visual",
-    skillName: "UI/UX Design",
-    skillId: "skill-2",
-    categoryId: "cat-desain",
-    level: "intermediate",
-    rating: 4.6,
-  },
-  {
-    id: "mentor-3",
-    name: "Sari Dewi",
-    department: "Sastra Inggris",
-    skillName: "Conversational English",
-    skillId: "skill-3",
-    categoryId: "cat-bahasa",
-    level: "advanced",
-    rating: 4.9,
-  },
-  {
-    id: "mentor-4",
-    name: "Bayu Aditya",
-    department: "Manajemen",
-    skillName: "Public Speaking",
-    skillId: "skill-4",
-    categoryId: "cat-bisnis",
-    level: "beginner",
-    rating: 4.2,
-  },
-  {
-    id: "mentor-5",
-    name: "Putri Amalia",
-    department: "Seni Musik",
-    skillName: "Gitar Akustik",
-    skillId: "skill-5",
-    categoryId: "cat-seni",
-    level: "intermediate",
-    rating: 4.7,
-  },
-  {
-    id: "mentor-6",
-    name: "Fajar Nugroho",
-    department: "Fisika",
-    skillName: "Kalkulus Dasar",
-    skillId: "skill-6",
-    categoryId: "cat-akademik",
-    level: "advanced",
-    rating: 4.5,
-  },
-];
-
-
-
 export default function ExplorePage() {
   const pathname = usePathname();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Load categories
+        const catRes = await fetch("/api/categories");
+        if (catRes.ok) {
+          const { categories: rawCats } = await catRes.json();
+          setCategories(
+            (rawCats || []).map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              iconEmoji: c.icon,
+            }))
+          );
+        }
+
+        // Load mentors (from skills table)
+        const skillRes = await fetch("/api/skills");
+        if (skillRes.ok) {
+          const { skills } = await skillRes.json();
+          const loadedMentors: Mentor[] = (skills || []).map((s: any) => ({
+            id: s.users?.id + "-" + s.id, // Supaya unik di UI kalau 1 user punya banyak skill
+            name: s.users?.name || "Unknown",
+            department: s.users?.department || "Unknown",
+            avatarUrl: s.users?.avatar || undefined,
+            skillName: s.title,
+            skillId: s.id,
+            categoryId: s.category_id,
+            level: s.level,
+            rating: 5.0, // Default for now
+          }));
+          setMentors(loadedMentors);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadData();
+  }, []);
 
   const filteredMentors = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -122,7 +90,7 @@ export default function ExplorePage() {
         mentor.skillName.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, mentors]);
 
   return (
     <div className="flex h-screen">

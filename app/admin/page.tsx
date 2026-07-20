@@ -15,15 +15,31 @@ interface AdminStat {
   icon: React.ElementType;
 }
 
-const adminStats: AdminStat[] = [
-  { label: "Total Users", value: "128", icon: Users },
-  { label: "Total Skills", value: "342", icon: Sparkles },
-  { label: "Total Categories", value: "7", icon: FolderKanban },
-];
+  const [stats, setStats] = useState<AdminStat[]>([
+    { label: "Total Users", value: "...", icon: Users },
+    { label: "Total Skills", value: "...", icon: Sparkles },
+    { label: "Total Categories", value: "...", icon: FolderKanban },
+  ]);
 
-export default function AdminPage() {
-  const router = useRouter();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/admin/stats");
+        if (res.ok) {
+          const data = await res.json();
+          const s = data.stats || {};
+          setStats([
+            { label: "Total Users", value: String(s.totalUsers || 0), icon: Users },
+            { label: "Total Skills", value: String(s.totalSkills || 0), icon: Sparkles },
+            { label: "Total Requests", value: String(s.totalRequests || 0), icon: FolderKanban },
+          ]);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadStats();
+  }, []);
 
   return (
     <div className="flex h-screen">
@@ -43,7 +59,7 @@ export default function AdminPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {adminStats.map((stat) => {
+              {stats.map((stat) => {
                 const Icon = stat.icon;
                 return (
                   <Card key={stat.label} className="shadow-card">

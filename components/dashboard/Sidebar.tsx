@@ -29,8 +29,8 @@ interface NavItem {
 const primaryNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Explore", href: "/explore", icon: Compass },
-  { label: "My Requests", href: "/requests", icon: Inbox, badge: 3 },
-  { label: "Chat", href: "/chat", icon: MessageSquare, badge: 2 },
+  { label: "My Requests", href: "/requests", icon: Inbox },
+  { label: "Chat", href: "/chat", icon: MessageSquare },
 ];
 
 const accountNavItems: NavItem[] = [
@@ -118,22 +118,37 @@ export function Sidebar() {
   const isAdmin = pathname?.startsWith("/admin") ?? false;
 
   const [currentUser, setCurrentUser] = useState<CurrentUser>({
-    name: "Dimas Pratama",
-    email: "dimas.pratama@student.ac.id",
+    name: "Loading...",
+    email: "",
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const { user } = await res.json();
+          setCurrentUser({
+            name: user.name,
+            email: user.email,
+            avatarUrl: user.avatar,
+          });
+        }
+      } catch {
+        // Abaikan
+      }
     }
+    loadUser();
   }, []);
 
-  function handleLogout() {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userRole");
-    router.push("/login");
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+    } catch {
+      // Abaikan error
+      router.push("/login");
+    }
   }
 
   return (
