@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, Search, X, Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -10,11 +10,6 @@ interface TopNavbarProps {
   hasNotifications?: boolean;
   searchPlaceholder?: string;
 }
-
-const currentUser = {
-  name: "Dimas Pratama",
-  avatarUrl: undefined as string | undefined,
-};
 
 function getInitials(name: string) {
   return name
@@ -31,6 +26,32 @@ export function TopNavbar({
   searchPlaceholder = "Search mentor or skill...",
 }: TopNavbarProps) {
   const [query, setQuery] = useState("");
+
+  const [currentUser, setCurrentUser] = useState<{
+    name: string;
+    avatarUrl?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/auth/me");
+
+        if (res.ok) {
+          const data = await res.json();
+
+          setCurrentUser({
+            name: data.user.name,
+            avatarUrl: data.user.avatar,
+          });
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    loadUser();
+  }, []);
 
   return (
     <header className="flex h-14 items-center gap-3 border-b border-border bg-card px-4 sm:px-6">
@@ -83,10 +104,14 @@ export function TopNavbar({
         </button>
 
         <Avatar className="h-9 w-9">
-          <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-          <AvatarFallback className="bg-accent text-accent-foreground">
-            {getInitials(currentUser.name)}
-          </AvatarFallback>
+            <AvatarImage
+              src={currentUser?.avatarUrl}
+              alt={currentUser?.name ?? "User"}
+            />
+
+            <AvatarFallback className="bg-accent text-accent-foreground">
+              {currentUser?.name ? getInitials(currentUser.name) : "U"}
+            </AvatarFallback>
         </Avatar>
       </div>
     </header>
